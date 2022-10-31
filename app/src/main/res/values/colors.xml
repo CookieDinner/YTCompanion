@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="transparent">#00FFFFFF</color>
+    <color name="PrimaryLight">#673AB7</color>
+    <color name="PrimaryDark">#9575CD</color>
+
+    <color name="SecondaryLight">#B31E48</color>
+    <color name="SecondaryDark">#D33A65</color>
+
+    <color name="SecondaryVariant">#D33A51</color>
+
+    <color name="Accent">#FF6200EE</color>
+    <color name="purple_700">#512DA8</color>
+    <color name="darkBackground">#1E1E1E</color>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="lighterAccent">#F4F4F4</color>
+    <color name="darkerAccent">#0E0E0E</color>
+
+    <color name="textLight">#5A5A5A</color>
+    <color name="textDark">#C8C8C8</color>
+
+    <color name="dim">#4D000000</color>
+
+    <color name="floatingDark">#424242</color>
+    <color name="floatingDarkBorder">#4A4A4A</color>
+
+    <color name="floatingLight">#FEFEFE</color>
+    <color name="floatingLightBorder">#F6F5F5</color>
+
+    <color name="dividerDark">#878787</color>
+    <color name="dividerLight">#9B9B9B</color>
+
+
+</resources>

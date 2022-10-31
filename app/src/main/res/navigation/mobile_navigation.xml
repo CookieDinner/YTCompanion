@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_bookmarks">
+
+    <fragment
+        android:id="@+id/navigation_bookmarks"
+        android:name="com.cookiedinner.ytcompanion.views.fragments.BookmarksFragment"
+        tools:layout="@layout/fragment_bookmarks" >
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_downloads"
+        android:name="com.cookiedinner.ytcompanion.views.fragments.DownloadsFragment"
+        tools:layout="@layout/fragment_downloads" />
+
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="com.cookiedinner.ytcompanion.views.fragments.SettingsFragment"
+        tools:layout="@layout/fragment_settings" />
+</navigation>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="preferences_theme">
+        <item>On</item>
+        <item>Off</item>
+        <item>System</item>
+    </string-array>
+    <string-array name="preferences_quality">
+        <item>144p</item>
+        <item>240p</item>
+        <item>360p</item>
+        <item>480p</item>
+        <item>720p</item>
+        <item>1080p</item>
+    </string-array>
+    <string-array name="preferences_extension">
+        <item>Video</item>
+        <item>Audio</item>
+    </string-array>
+</resources>

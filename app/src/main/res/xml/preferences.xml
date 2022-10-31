@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        app:key="theming"
+        app:title="Customization"
+        app:iconSpaceReserved="false">
+        <ListPreference
+            app:key="theme"
+            app:title="@string/preferences_theme_title"
+            app:summary="..."
+            app:dialogTitle="@string/preferences_theme_title"
+            app:entries="@array/preferences_theme"
+            app:entryValues="@array/preferences_theme"
+            app:defaultValue="System"
+            app:iconSpaceReserved="false"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        app:key="download_settings"
+        app:title="Download settings"
+        app:iconSpaceReserved="false">
+        <ListPreference
+            app:key="quality"
+            app:title="@string/preferences_quality_title"
+            app:summary="..."
+            app:dialogTitle="@string/preferences_quality_title"
+            app:entries="@array/preferences_quality"
+            app:entryValues="@array/preferences_quality"
+            app:defaultValue="1080p"
+            app:iconSpaceReserved="false"/>
+        <ListPreference
+            app:key="extension"
+            app:title="@string/preferences_extension_title"
+            app:summary="..."
+            app:dialogTitle="@string/preferences_extension_title"
+            app:entries="@array/preferences_extension"
+            app:entryValues="@array/preferences_extension"
+            app:defaultValue="Video"
+            app:iconSpaceReserved="false"/>
+    </PreferenceCategory>
+</PreferenceScreen>

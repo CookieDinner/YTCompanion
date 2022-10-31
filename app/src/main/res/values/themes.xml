@@ -1,0 +1,29 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.YTCompanion" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/PrimaryLight</item>
+        <item name="android:windowBackground">@color/lighterAccent</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="textFillColor">@color/textLight</item>
+
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/SecondaryLight</item>
+        <item name="colorSecondaryVariant">@color/SecondaryVariant</item>
+        <item name="colorOnSecondary">@color/black</item>
+
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+
+        <!-- Customization. -->
+        <item name="android:navigationBarColor">@color/white</item>
+
+        <item name="android:colorBackgroundFloating">@color/floatingLight</item>
+        <item name="haloColor">@color/floatingLightBorder</item>
+
+        <item name="dividerColor">@color/dividerLight</item>
+
+    </style>
+</resources>
