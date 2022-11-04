@@ -7,7 +7,7 @@
     tools:context=".views.fragments.BookmarksFragment">
 
         <TextView
-            android:id="@+id/text_bookmarks"
+            android:id="@+id/text_empty_bookmarks"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -21,7 +21,9 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
-            android:visibility="gone"
+            android:visibility="visible"
+            android:paddingTop="12dp"
+            android:clipToPadding="false"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 

@@ -8,11 +8,13 @@
         <item name="colorPrimaryVariant">@color/purple_700</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="textFillColor">@color/textLight</item>
+        <item name="android:textColor">@color/textLight</item>
 
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/SecondaryLight</item>
         <item name="colorSecondaryVariant">@color/SecondaryVariant</item>
         <item name="colorOnSecondary">@color/black</item>
+
 
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
@@ -24,6 +26,15 @@
         <item name="haloColor">@color/floatingLightBorder</item>
 
         <item name="dividerColor">@color/dividerLight</item>
+        <item name="snackbarStyle">@style/NightSnackbar</item>
+        <item name="snackbarTextViewStyle">@style/NightSnackbar.TextView</item>
 
+    </style>
+
+    <style name="DaySnackbar" parent="Widget.MaterialComponents.Snackbar">
+        <item name="android:background">@color/floatingLight</item>
+    </style>
+    <style name="DaySnackbar.TextView" parent="Widget.MaterialComponents.Snackbar.TextView">
+        <item name="android:textColor">@color/textLight</item>
     </style>
 </resources>

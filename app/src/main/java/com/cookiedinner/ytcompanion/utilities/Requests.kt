@@ -1,7 +1,4 @@
 package com.cookiedinner.ytcompanion.utilities
-
-import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
-import io.reactivex.Single
 import okhttp3.OkHttpClient
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -25,7 +22,6 @@ object YoutubeRequests {
         retrofit = Retrofit.Builder()
             .baseUrl(url)
             .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .client(okHttpClient)
             .build()
         service = retrofit.create(RetrofitRequests::class.java)
@@ -50,6 +46,6 @@ object YoutubeRequests {
 
 interface RetrofitRequests {
     @GET("/oembed")
-    suspend fun getVideoMetadata(@Query("url") videoID: String): Response<YoutubeVideoMetadata>
+    suspend fun getVideoMetadata(@Query("url") videoLink: String): Response<YoutubeVideoMetadata>
 }
 

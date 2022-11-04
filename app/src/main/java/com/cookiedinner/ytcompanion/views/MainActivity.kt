@@ -19,10 +19,9 @@ import androidx.preference.PreferenceManager
 import com.cookiedinner.ytcompanion.R
 import com.cookiedinner.ytcompanion.databinding.ActivityMainBinding
 import com.cookiedinner.ytcompanion.databinding.AddBookmarkSheetBinding
+import com.cookiedinner.ytcompanion.utilities.*
 import com.cookiedinner.ytcompanion.utilities.database.AppDatabase
 import com.cookiedinner.ytcompanion.utilities.database.BookmarkedVideo
-import com.cookiedinner.ytcompanion.utilities.hideKeyboard
-import com.cookiedinner.ytcompanion.utilities.observeFresh
 import com.cookiedinner.ytcompanion.views.viewmodels.MainActivityViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -33,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var navOptions: NavOptions
     private lateinit var bottomNavView: BottomNavigationView
+    private var currentMetadata: YoutubeVideoMetadata? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +53,17 @@ class MainActivity : AppCompatActivity() {
             binding.dimLayout.visibility = View.VISIBLE
             viewModel.notifyPopupOpened(true)
             binding.floatingActionButton.isExpanded = true
+        }
+        viewModel.liveDataFab.observe(this) {
+            val event = it.contentIfNotHandled
+            if (event != null) {
+                if (event.isVisible != null) {
+                    if (event.isVisible)
+                        binding.floatingActionButton.show()
+                    else
+                        binding.floatingActionButton.hide()
+                }
+            }
         }
         setupBookmarksSheet()
     }
@@ -130,52 +141,50 @@ class MainActivity : AppCompatActivity() {
         val sheetBinding = AddBookmarkSheetBinding.inflate(layoutInflater)
         binding.fabSheet.addView(sheetBinding.root)
 
-        viewModel.liveDataResetPopup.observe(this) {
+        viewModel.liveDataResetPopup.observeFresh(this) {
             sheetBinding.textEditURL.text = null
             sheetBinding.textViewURL.error = null
             clearBookmarksSheet(sheetBinding)
         }
 
         sheetBinding.dialogAddButton.setOnClickListener {
-            if (sheetBinding.videoTitle.text.isNotEmpty()) {
-                AppDatabase.getInstance(baseContext).bookmarkedVideosDao().insertAll(
-                    BookmarkedVideo(
-                        0,
-                        sheetBinding.videoTitle.text.toString(),
-                        sheetBinding.videoChannel.text.toString(),
-                        sheetBinding.textEditURL.text.toString(),
-                        null
-                    )
-                )
+            val possibleVideoID = viewModel.checkIfValidYoutubeURL(sheetBinding.textEditURL.text.toString())
+            if (possibleVideoID != null) {
+                currentMetadata?.video_link = sheetBinding.textEditURL.text.toString()
+                viewModel.insertIntoBookmarks(this, currentMetadata)
                 hidePopup()
             }
         }
 
         viewModel.liveDataYoutubeVideoMetadata.observeFresh(this) {
+            sheetBinding.metadataProgressBar.visibility = View.GONE
             val result = it.contentIfNotHandled
             if (result != null) {
                 if (result.isSuccess) {
-                    val metadata = result.getOrNull()!!
-                    Log.d("Tests", "Success")
-                    sheetBinding.videoTitle.text = metadata.title
-                    sheetBinding.videoChannel.text = metadata.author_name
+                    sheetBinding.dialogAddButton.enable(this)
+                    currentMetadata = result.getOrNull()!!
+                    sheetBinding.videoTitle.text = currentMetadata!!.title
+                    sheetBinding.videoChannel.text = currentMetadata!!.author_name
                     sheetBinding.placeholder.visibility = View.INVISIBLE
-                    Log.d("Tests", metadata.toString())
                     viewModel.loadImageFromURLInto(
                         baseContext,
-                        metadata.thumbnail_url,
-                        sheetBinding.imageView
+                        currentMetadata!!.thumbnail_url,
+                        sheetBinding.thumbnailImageView
                     ) { imageResult ->
                         if (imageResult) {
                             sheetBinding.activeThumbnailBorder.visibility = View.VISIBLE
                         } else {
                             sheetBinding.activeThumbnailBorder.visibility = View.INVISIBLE
                         }
+                        sheetBinding.thumbnailProgressBar.visibility = View.GONE
+                        sheetBinding.placeholder.visibility = View.VISIBLE
                     }
                 } else {
                     val exception = result.exceptionOrNull()!!
                     sheetBinding.textViewURL.error = exception.message
                     clearBookmarksSheet(sheetBinding)
+                    sheetBinding.thumbnailProgressBar.visibility = View.GONE
+                    sheetBinding.placeholder.visibility = View.VISIBLE
                 }
             }
         }
@@ -183,6 +192,8 @@ class MainActivity : AppCompatActivity() {
         val handler = Handler(Looper.getMainLooper())
         var workRunnable: Runnable? = null
         sheetBinding.textEditURL.addTextChangedListener {
+            sheetBinding.dialogAddButton.disable()
+            clearBookmarksSheet(sheetBinding)
             if (workRunnable != null)
                 handler.removeCallbacks(workRunnable!!)
             workRunnable = Runnable {
@@ -192,6 +203,7 @@ class MainActivity : AppCompatActivity() {
                         sheetBinding.textViewURL.error = null
                         sheetBinding.metadataProgressBar.visibility = View.VISIBLE
                         sheetBinding.thumbnailProgressBar.visibility = View.VISIBLE
+                        sheetBinding.placeholder.visibility = View.GONE
                         viewModel.getYoutubeVideoMetadata(possibleVideoID)
                     } else {
                         sheetBinding.textViewURL.error = "Invalid URL"
@@ -218,7 +230,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun clearBookmarksSheet(sheetBinding: AddBookmarkSheetBinding) {
         sheetBinding.activeThumbnailBorder.visibility = View.INVISIBLE
-        sheetBinding.imageView.setImageResource(0)
+        sheetBinding.thumbnailImageView.setImageResource(0)
         sheetBinding.videoTitle.text = ""
         sheetBinding.videoChannel.text = ""
         sheetBinding.placeholder.visibility = View.VISIBLE

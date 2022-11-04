@@ -11,7 +11,7 @@
         android:layout_height="64dp"
         android:gravity="center"
         android:layout_marginStart="32dp"
-        android:text="Add bookmarked video"
+        android:text="@string/add_new_bookmark"
         android:textSize="20sp"
         android:textColor="?textFillColor"
         app:layout_constraintTop_toTopOf="parent"
@@ -29,7 +29,7 @@
         android:layout_marginEnd="24dp"
         android:layout_gravity="top|end"
         android:background="@color/transparent"
-        android:text="CONFIRM"
+        android:text="@string/confirm"
         android:textSize="14sp"
         android:textColor="?colorPrimary" />
 
@@ -54,7 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="Video link..."
+            android:hint="@string/video_link"
             app:errorEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -67,7 +67,7 @@
                 android:autofillHints="username"
                 android:ems="16"
                 android:inputType="textUri"
-                android:textColor="@color/textDark" />
+                android:textColor="?textFillColor" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <FrameLayout
@@ -103,15 +103,17 @@
                 android:layout_gravity="center"
                 android:src="@drawable/ic_baseline_image_24"
                 android:visibility="visible"
-                app:tint="?dividerColor" />
+                app:tint="?dividerColor"
+                android:contentDescription="@string/empty_thumbnail_image" />
 
             <ImageView
-                android:id="@+id/imageView"
+                android:id="@+id/thumbnailImageView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:padding="2dp"
-                android:visibility="visible" />
+                android:visibility="visible"
+                android:contentDescription="@string/thumbnail_image" />
         </FrameLayout>
 
         <TextView
@@ -174,11 +176,11 @@
             android:layout_height="wrap_content"
             android:indeterminateTint="?dividerColor"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@id/video_channel_title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.85"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/video_title_title" />
+            app:layout_constraintTop_toTopOf="@id/thumbnail_holder"
+            app:layout_constraintBottom_toBottomOf="@id/thumbnail_holder"/>
 
         <!--        <com.google.android.material.textfield.TextInputLayout-->
         <!--            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"-->

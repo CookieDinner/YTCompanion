@@ -2,11 +2,6 @@ package com.cookiedinner.ytcompanion.models
 
 import android.media.Image
 
-data class BookmarkedVideo(
-    val name: String,
-    val link: String,
-)
-
 data class DownloadedVideo(
     val name: String,
     val fileLocation: String,

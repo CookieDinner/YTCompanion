@@ -24,6 +24,16 @@
         <item name="haloColor">@color/floatingDarkBorder</item>
 
         <item name="dividerColor">@color/dividerDark</item>
+        <item name="snackbarStyle">@style/NightSnackbar</item>
+        <item name="snackbarTextViewStyle">@style/NightSnackbar.TextView</item>
 
     </style>
+
+    <style name="NightSnackbar" parent="Widget.MaterialComponents.Snackbar">
+        <item name="android:background">@color/floatingDark</item>
+    </style>
+    <style name="NightSnackbar.TextView" parent="Widget.MaterialComponents.Snackbar.TextView">
+        <item name="android:textColor">@color/textDark</item>
+    </style>
+
 </resources>

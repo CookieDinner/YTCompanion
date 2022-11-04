@@ -12,5 +12,10 @@
     <string name="press_to_download_a_new_video">Press # to download a new video</string>
     <string name="bookmark_dialog_video_title">Title:</string>
     <string name="bookmark_dialog_video_channel">Channel:</string>
+    <string name="empty_thumbnail_image">Empty Thumbnail Image</string>
+    <string name="thumbnail_image">Thumbnail Image</string>
+    <string name="video_link">Video link...</string>
+    <string name="confirm">CONFIRM</string>
+    <string name="add_new_bookmark">Add new bookmark</string>
 
 </resources>

@@ -1,9 +1,11 @@
 package com.cookiedinner.ytcompanion.views.viewmodels
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.Log
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,25 +20,44 @@ import com.cookiedinner.ytcompanion.models.FabData
 import com.cookiedinner.ytcompanion.utilities.Event
 import com.cookiedinner.ytcompanion.utilities.YoutubeRequests
 import com.cookiedinner.ytcompanion.utilities.YoutubeVideoMetadata
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import com.cookiedinner.ytcompanion.utilities.database.AppDatabase
+import com.cookiedinner.ytcompanion.utilities.database.BookmarkedVideo
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class MainActivityViewModel: ViewModel() {
 
     private var onBackPressedBlocked = false
 
-    private var _mutableLiveDataHideBottomNav = MutableLiveData<Boolean>()
-    val liveDataHideBottomNav: LiveData<Boolean> get() = _mutableLiveDataHideBottomNav
+//    private var _mutableLiveDataHideBottomNav = MutableLiveData<Boolean>()
+//    val liveDataHideBottomNav: LiveData<Boolean> get() = _mutableLiveDataHideBottomNav
+//
+    val liveDataHideBottomNav: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
 
-    private var _mutableLiveDataBackPressed = MutableLiveData<Boolean>()
-    val liveDataBackPressed: LiveData<Boolean> get() = _mutableLiveDataBackPressed
+//    private var _mutableLiveDataBackPressed = MutableLiveData<Boolean>()
+//    val liveDataBackPressed: LiveData<Boolean> get() = _mutableLiveDataBackPressed
 
-    private var _mutableLiveDataFab = MutableLiveData<FabData>()
-    val liveDataFab: LiveData<FabData> get() = _mutableLiveDataFab
+    val liveDataBackPressed: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
 
-    private var _mutableLiveDataResetPopup = MutableLiveData<Boolean>()
-    val liveDataResetPopup: LiveData<Boolean> get() = _mutableLiveDataResetPopup
+
+//    private var _mutableLiveDataFab = MutableLiveData<FabData>()
+//    val liveDataFab: LiveData<FabData> get() = _mutableLiveDataFab
+    val liveDataFab: MutableLiveData<Event<FabData>> by lazy {
+        MutableLiveData<Event<FabData>>()
+}
+
+//    private var _mutableLiveDataResetPopup = MutableLiveData<Boolean>()
+//    val liveDataResetPopup: LiveData<Boolean> get() = _mutableLiveDataResetPopup
+
+    val liveDataResetPopup: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
 
 //    private val _mutableLiveDataYoutubeVideoMetadata = MutableLiveData<Result<YoutubeVideoMetadata>>()
 //    val liveDataYoutubeVideoMetadata: LiveData<Result<YoutubeVideoMetadata>> get() = _mutableLiveDataYoutubeVideoMetadata
@@ -45,15 +66,27 @@ class MainActivityViewModel: ViewModel() {
         MutableLiveData<Event<Result<YoutubeVideoMetadata>>>()
     }
 
+    val liveDataSnackbar: MutableLiveData<Event<String>> by lazy {
+        MutableLiveData<Event<String>>()
+    }
+
+    val liveDataBookmarkInserted: MutableLiveData<Event<BookmarkedVideo>> by lazy {
+        MutableLiveData<Event<BookmarkedVideo>>()
+    }
+
+    val liveDataBookmarkDeleted: MutableLiveData<Event<Int>> by lazy {
+        MutableLiveData<Event<Int>>()
+    }
+
 
 
     fun hideBottomNavigationView(shouldHide: Boolean) {
-        _mutableLiveDataHideBottomNav.value = shouldHide
+        liveDataHideBottomNav.value = shouldHide
     }
 
     fun handleOnBackPressed(): Boolean {
         return if (onBackPressedBlocked) {
-            _mutableLiveDataBackPressed.value = true
+            liveDataBackPressed.value = true
             onBackPressedBlocked = false
             false
         } else true
@@ -64,19 +97,21 @@ class MainActivityViewModel: ViewModel() {
     }
 
     fun notifyFab(isExpanded: Boolean? = null, isVisible: Boolean? = null) {
-        _mutableLiveDataFab.value = FabData(
-            isExpanded = isExpanded,
-            isVisible = isVisible,
+        liveDataFab.value = Event(
+            FabData(
+                isExpanded = isExpanded,
+                isVisible = isVisible,
+            )
         )
     }
 
     fun resetPopup() {
-        _mutableLiveDataResetPopup.value = true
+        liveDataResetPopup.value = true
     }
 
     fun checkIfValidYoutubeURL(stringToCheck: String) : String? {
         val ytRegex =
-            Regex("^(?:http://|https://|)(?:youtube\\.com/watch\\?v=|(?:http://|https://|)youtu\\.be/)([a-zA-z0-9-_]+)(?:&\\S*$|$)")
+            Regex("^(?:http://|https://|)(?:(?:|www\\.)youtube\\.com/watch\\?v=|(?:http://|https://|)youtu\\.be/)([a-zA-z0-9-_]+)(?:&\\S*$|$)")
         val result = ytRegex.find(stringToCheck)
         if (result != null) {
             val groupResults = result.groupValues
@@ -129,23 +164,55 @@ class MainActivityViewModel: ViewModel() {
                 liveDataYoutubeVideoMetadata.value = Event(Result.failure(exception))
             }
         }
-//        val videoURL = "https://youtu.be/$videoID"
-//        YoutubeRequests
-//            .getVideoMetadata(videoURL)
-//            .subscribeOn(Schedulers.io())
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .subscribe(
-//                { response ->
-//                    if (response.isSuccessful) {
-//                        callback?.invoke(response.body())
-//                    } else {
-//                        callback?.invoke(null)
-//                    }
-//                },
-//                { errorResponse ->
-//                    errorCallback?.invoke(errorResponse)
-//                }
-//            )
-//            .apply {}
+    }
+
+    fun insertIntoBookmarks(activity: Activity, metadata: YoutubeVideoMetadata?) {
+        viewModelScope.launch {
+            try {
+                val bookmarksDao = AppDatabase.getInstance(activity).bookmarkedVideosDao()
+                val newId = bookmarksDao.insertAll(
+                    BookmarkedVideo(
+                        0,
+                        metadata!!.title,
+                        metadata.author_name,
+                        metadata.video_link!!,
+                        null
+                    )
+                )
+                val newBookmarkedVideo = bookmarksDao.findById(newId.first())
+                liveDataBookmarkInserted.value = Event(newBookmarkedVideo)
+                //liveDataSnackbar.value = Event("Added \"${newBookmarkedVideo.title}\" at Id=${newId.first()}")
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+//                Toast.makeText(activity, ex.message, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    fun deleteFromBookmarks(activity: Activity, id: Int) {
+        viewModelScope.launch {
+            try {
+                val bookmarksDao = AppDatabase.getInstance(activity).bookmarkedVideosDao()
+                val deletedRowsNumber = bookmarksDao.deleteById(id)
+                if (deletedRowsNumber > 0) {
+                    Log.d("Tests", "$deletedRowsNumber: $id")
+                    liveDataBookmarkDeleted.value = Event(id)
+                    //liveDataSnackbar.value = Event("Deleted bookmark")
+                }
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+//                Toast.makeText(activity, ex.message, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    fun getAllBookmarks(activity: Activity): LiveData<List<BookmarkedVideo>>{
+        val result = MutableLiveData<List<BookmarkedVideo>>()
+        viewModelScope.launch {
+            val bookmarksDao = AppDatabase.getInstance(activity).bookmarkedVideosDao()
+            val list = bookmarksDao.getAll()
+            result.value = list
+        }
+        return result
     }
 }

@@ -13,5 +13,6 @@ data class YoutubeVideoMetadata(
     val thumbnail_height: Int,
     val thumbnail_width: Int,
     val thumbnail_url: String,
-    val html: String
+    val html: String,
+    var video_link: String?
 )

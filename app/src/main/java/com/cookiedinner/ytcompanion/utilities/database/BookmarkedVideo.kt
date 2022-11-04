@@ -1,5 +1,6 @@
 package com.cookiedinner.ytcompanion.utilities.database
 
+import androidx.lifecycle.LiveData
 import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Delete
@@ -7,6 +8,7 @@ import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import kotlinx.coroutines.delay
 
 @Entity(tableName = "bookmarked_videos")
 data class BookmarkedVideo(
@@ -53,17 +55,20 @@ data class BookmarkedVideo(
 @Dao
 interface BookmarkedVideoDao {
     @Query("SELECT * FROM bookmarked_videos")
-    fun getAll(): List<BookmarkedVideo>
+    suspend fun getAll(): List<BookmarkedVideo>
 
     @Query("SELECT * FROM bookmarked_videos WHERE id = :id")
-    fun findById(id: Int): BookmarkedVideo
+    suspend fun findById(id: Long): BookmarkedVideo
 
     @Query("SELECT * FROM bookmarked_videos WHERE title LIKE :searchQuery OR channel_name LIKE :searchQuery")
-    fun findByTitleOrChannelName(searchQuery: String): BookmarkedVideo
+    suspend fun findByTitleOrChannelName(searchQuery: String): List<BookmarkedVideo>
+
+    @Query("DELETE FROM bookmarked_videos WHERE id = :id")
+    suspend fun deleteById(id: Int) : Int
 
     @Insert
-    fun insertAll(vararg bookmarkedVideos: BookmarkedVideo)
+    suspend fun insertAll(vararg bookmarkedVideos: BookmarkedVideo): List<Long>
 
     @Delete
-    fun delete(bookmarkedVideo: BookmarkedVideo)
+    suspend fun delete(bookmarkedVideo: BookmarkedVideo): Int
 }
