@@ -6,7 +6,7 @@
         <item name="colorPrimary">@color/PrimaryLight</item>
         <item name="android:windowBackground">@color/lighterAccent</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnPrimary">@color/OnPrimaryLight</item>
         <item name="textFillColor">@color/textLight</item>
         <item name="android:textColor">@color/textLight</item>
 
@@ -26,8 +26,11 @@
         <item name="haloColor">@color/floatingLightBorder</item>
 
         <item name="dividerColor">@color/dividerLight</item>
-        <item name="snackbarStyle">@style/NightSnackbar</item>
-        <item name="snackbarTextViewStyle">@style/NightSnackbar.TextView</item>
+        <item name="snackbarStyle">@style/DaySnackbar</item>
+        <item name="snackbarTextViewStyle">@style/DaySnackbar.TextView</item>
+        <item name="snackbarButtonStyle">@style/DaySnackbar.Button</item>
+
+        <item name="cardBackgroundColor">@color/cardLight</item>
 
     </style>
 
@@ -37,4 +40,8 @@
     <style name="DaySnackbar.TextView" parent="Widget.MaterialComponents.Snackbar.TextView">
         <item name="android:textColor">@color/textLight</item>
     </style>
+    <style name="DaySnackbar.Button" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/PrimaryLight</item>
+    </style>
+
 </resources>

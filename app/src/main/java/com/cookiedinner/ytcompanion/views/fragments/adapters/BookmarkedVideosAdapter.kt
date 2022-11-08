@@ -1,28 +1,42 @@
 package com.cookiedinner.ytcompanion.views.fragments.adapters
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.cookiedinner.ytcompanion.R
 import com.cookiedinner.ytcompanion.databinding.BookmarkedVideoBinding
 import com.cookiedinner.ytcompanion.utilities.database.BookmarkedVideo
 import com.cookiedinner.ytcompanion.views.viewmodels.MainActivityViewModel
+import com.google.android.material.button.MaterialButton
 
 interface BookmarkedVideosAdapterInterface {
-    fun downloadButtonPressed(id: Int)
-    fun deleteButtonPressed(id: Int)
+    fun downloadButtonPressed(bookmarkedVideo: BookmarkedVideo, pressedButton: MaterialButton)
+    fun cardPressed(bookmarkedVideo: BookmarkedVideo)
 }
 
-class BookmarkedVideosAdapter(private val list: MutableList<BookmarkedVideo>, private val buttonInferface: BookmarkedVideosAdapterInterface): RecyclerView.Adapter<BookmarkedVideosAdapter.ViewHolder>() {
+class BookmarkedVideosAdapter(private val list: MutableList<BookmarkedVideo>, private val buttonInterface: BookmarkedVideosAdapterInterface): RecyclerView.Adapter<BookmarkedVideosAdapter.ViewHolder>() {
     class ViewHolder(private val binding: BookmarkedVideoBinding): RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: BookmarkedVideo, buttonInferface: BookmarkedVideosAdapterInterface) {
+        fun bind(item: BookmarkedVideo, buttonInterface: BookmarkedVideosAdapterInterface) {
             binding.videoTitle.text = item.title
             binding.videoChannel.text = item.channelName
-            binding.deleteButton.setOnClickListener {
-                buttonInferface.deleteButtonPressed(item.id)
+            binding.downloadButton.setOnClickListener {
+                buttonInterface.downloadButtonPressed(item, binding.downloadButton)
             }
+            binding.cardView.setOnClickListener {
+                buttonInterface.cardPressed(item)
+            }
+            val imageByteArray = Base64.decode(item.thumbnail, Base64.DEFAULT)
+            Glide.with(binding.thumbnailImageView.context)
+                .load(imageByteArray)
+                .placeholder(R.drawable.ic_baseline_image_24)
+                .into(binding.thumbnailImageView)
         }
     }
 
@@ -32,7 +46,7 @@ class BookmarkedVideosAdapter(private val list: MutableList<BookmarkedVideo>, pr
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(list[position], buttonInferface)
+        holder.bind(list[position], buttonInterface)
     }
 
     override fun getItemCount(): Int {

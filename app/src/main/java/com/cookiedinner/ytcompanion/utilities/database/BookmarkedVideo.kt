@@ -24,37 +24,16 @@ data class BookmarkedVideo(
     @ColumnInfo(name = "video_url")
     val videoUrl: String,
 
-    @ColumnInfo(name = "thumbnail", typeAffinity = ColumnInfo.BLOB)
-    val thumbnail: ByteArray?
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+    @ColumnInfo(name = "thumbnail")
+    val thumbnail: String,
 
-        other as BookmarkedVideo
-
-        if (id != other.id) return false
-        if (title != other.title) return false
-        if (channelName != other.channelName) return false
-        if (videoUrl != other.videoUrl) return false
-        if (!thumbnail.contentEquals(other.thumbnail)) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = id
-        result = 31 * result + title.hashCode()
-        result = 31 * result + channelName.hashCode()
-        result = 31 * result + videoUrl.hashCode()
-        result = 31 * result + thumbnail.contentHashCode()
-        return result
-    }
-}
+    @ColumnInfo(name = "modification_date")
+    val modificationDate: String
+)
 
 @Dao
 interface BookmarkedVideoDao {
-    @Query("SELECT * FROM bookmarked_videos")
+    @Query("SELECT * FROM bookmarked_videos ORDER BY modification_date DESC")
     suspend fun getAll(): List<BookmarkedVideo>
 
     @Query("SELECT * FROM bookmarked_videos WHERE id = :id")

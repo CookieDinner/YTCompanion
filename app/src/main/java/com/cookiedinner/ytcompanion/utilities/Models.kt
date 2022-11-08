@@ -14,5 +14,6 @@ data class YoutubeVideoMetadata(
     val thumbnail_width: Int,
     val thumbnail_url: String,
     val html: String,
-    var video_link: String?
+    var video_link: String?,
+    var thumbnailBase64: String?
 )

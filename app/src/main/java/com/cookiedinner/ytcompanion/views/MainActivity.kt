@@ -1,29 +1,36 @@
 package com.cookiedinner.ytcompanion.views
 
+import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModelProvider
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator
+import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.preference.PreferenceManager
+import androidx.transition.TransitionManager
 import com.cookiedinner.ytcompanion.R
 import com.cookiedinner.ytcompanion.databinding.ActivityMainBinding
 import com.cookiedinner.ytcompanion.databinding.AddBookmarkSheetBinding
 import com.cookiedinner.ytcompanion.utilities.*
-import com.cookiedinner.ytcompanion.utilities.database.AppDatabase
 import com.cookiedinner.ytcompanion.utilities.database.BookmarkedVideo
 import com.cookiedinner.ytcompanion.views.viewmodels.MainActivityViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.transition.MaterialArcMotion
+import com.google.android.material.transition.MaterialContainerTransform
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,14 +53,21 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupUI() {
         binding.dimLayout.setOnClickListener {
-            hidePopup()
+            viewModel.hidePopup()
         }
+
         binding.floatingActionButton.setOnClickListener {
-            bottomNavView.visibility = View.GONE
-            binding.dimLayout.visibility = View.VISIBLE
-            viewModel.notifyPopupOpened(true)
-            binding.floatingActionButton.isExpanded = true
+            morphFloatingActionButton()
         }
+
+        viewModel.liveDataAskForFabLocation.observeFresh(this) {
+            if (it.contentIfNotHandled != null) {
+                val fabLocation = intArrayOf(0, 0)
+                binding.navView.getLocationInWindow(fabLocation)
+                viewModel.setFabPosition(fabLocation[1])
+            }
+        }
+
         viewModel.liveDataFab.observe(this) {
             val event = it.contentIfNotHandled
             if (event != null) {
@@ -129,19 +143,50 @@ class MainActivity : AppCompatActivity() {
                     else
                         finish()
                 } else {
-                    hidePopup()
+                    viewModel.hidePopup()
                 }
             }
         }
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
 
+    private fun morphFloatingActionButton() {
+        val views = listOf(binding.floatingActionButton, binding.fabSheet).sortedBy { !it.isVisible }
+        val transform = MaterialContainerTransform().apply {
+            startView = views.first()
+            endView = views.last()
+            addTarget(views.last())
+            scrimColor = Color.TRANSPARENT
+            isElevationShadowEnabled = false
+            setPathMotion(MaterialArcMotion())
+        }
+
+        TransitionManager.beginDelayedTransition(binding.root, transform)
+        views.first().isVisible = false
+        views.last().isVisible = true
+        if (!binding.floatingActionButton.isVisible) {
+            bottomNavView.visibility = View.GONE
+            viewModel.notifyPopupOpened(true) {
+                hidePopup()
+            }
+            window.navigationBarColor = getThemeColorId(androidx.appcompat.R.attr.colorBackgroundFloating)
+            binding.dimLayout.visibility = View.VISIBLE
+        }
+        else {
+            bottomNavView.visibility = View.VISIBLE
+            viewModel.notifyPopupOpened(false)
+            window.navigationBarColor = getThemeColorId(com.google.android.material.R.attr.colorOnPrimary)
+            binding.dimLayout.visibility = View.GONE
+        }
+    }
+
     private fun setupBookmarksSheet() {
         binding.fabSheet.removeAllViewsInLayout()
         val sheetBinding = AddBookmarkSheetBinding.inflate(layoutInflater)
         binding.fabSheet.addView(sheetBinding.root)
+        var currentBase64Image = ""
 
-        viewModel.liveDataResetPopup.observeFresh(this) {
+        viewModel.liveDataResetFabSheet.observeFresh(this) {
             sheetBinding.textEditURL.text = null
             sheetBinding.textViewURL.error = null
             clearBookmarksSheet(sheetBinding)
@@ -151,8 +196,19 @@ class MainActivity : AppCompatActivity() {
             val possibleVideoID = viewModel.checkIfValidYoutubeURL(sheetBinding.textEditURL.text.toString())
             if (possibleVideoID != null) {
                 currentMetadata?.video_link = sheetBinding.textEditURL.text.toString()
-                viewModel.insertIntoBookmarks(this, currentMetadata)
-                hidePopup()
+                currentMetadata?.thumbnailBase64 = currentBase64Image
+                viewModel.insertIntoBookmarks(this,
+                    BookmarkedVideo(
+                        0,
+                        currentMetadata!!.title,
+                        currentMetadata!!.author_name,
+                        currentMetadata!!.video_link!!,
+                        currentMetadata!!.thumbnailBase64!!,
+                        getCurrentDate()
+                    )
+                )
+                viewModel.hidePopup()
+                showSnackbar("Added")
             }
         }
 
@@ -161,7 +217,6 @@ class MainActivity : AppCompatActivity() {
             val result = it.contentIfNotHandled
             if (result != null) {
                 if (result.isSuccess) {
-                    sheetBinding.dialogAddButton.enable(this)
                     currentMetadata = result.getOrNull()!!
                     sheetBinding.videoTitle.text = currentMetadata!!.title
                     sheetBinding.videoChannel.text = currentMetadata!!.author_name
@@ -170,9 +225,12 @@ class MainActivity : AppCompatActivity() {
                         baseContext,
                         currentMetadata!!.thumbnail_url,
                         sheetBinding.thumbnailImageView
-                    ) { imageResult ->
+                    ) { imageResult, base64Image ->
                         if (imageResult) {
                             sheetBinding.activeThumbnailBorder.visibility = View.VISIBLE
+                            sheetBinding.dialogAddButton.enable(this)
+                            if (base64Image != null)
+                                currentBase64Image = base64Image
                         } else {
                             sheetBinding.activeThumbnailBorder.visibility = View.INVISIBLE
                         }
@@ -222,10 +280,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun hidePopup() {
         hideKeyboard()
-        binding.dimLayout.visibility = View.GONE
-        bottomNavView.visibility = View.VISIBLE
-        binding.floatingActionButton.isExpanded = false
-        viewModel.resetPopup()
+        morphFloatingActionButton()
+        viewModel.resetFabSheet()
     }
 
     private fun clearBookmarksSheet(sheetBinding: AddBookmarkSheetBinding) {

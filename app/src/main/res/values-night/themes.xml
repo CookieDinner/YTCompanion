@@ -6,8 +6,9 @@
         <item name="colorPrimary">@color/PrimaryDark</item>
         <item name="android:windowBackground">@color/darkBackground</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorOnPrimary">@color/OnPrimaryDark</item>
         <item name="textFillColor">@color/textDark</item>
+        <item name="android:textColor">@color/textDark</item>
 
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/SecondaryDark</item>
@@ -26,6 +27,9 @@
         <item name="dividerColor">@color/dividerDark</item>
         <item name="snackbarStyle">@style/NightSnackbar</item>
         <item name="snackbarTextViewStyle">@style/NightSnackbar.TextView</item>
+        <item name="snackbarButtonStyle">@style/NightSnackbar.Button</item>
+
+        <item name="cardBackgroundColor">@color/cardDark</item>
 
     </style>
 
@@ -34,6 +38,9 @@
     </style>
     <style name="NightSnackbar.TextView" parent="Widget.MaterialComponents.Snackbar.TextView">
         <item name="android:textColor">@color/textDark</item>
+    </style>
+    <style name="NightSnackbar.Button" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/PrimaryDark</item>
     </style>
 
 </resources>

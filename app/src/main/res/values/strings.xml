@@ -17,5 +17,7 @@
     <string name="video_link">Video link...</string>
     <string name="confirm">CONFIRM</string>
     <string name="add_new_bookmark">Add new bookmark</string>
+    <string name="file_name">File name...</string>
+    <string name="download_as">Download as...</string>
 
 </resources>

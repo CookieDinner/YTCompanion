@@ -1,5 +1,6 @@
 package com.cookiedinner.ytcompanion.views.fragments
 
+import android.graphics.Color
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.style.DynamicDrawableSpan

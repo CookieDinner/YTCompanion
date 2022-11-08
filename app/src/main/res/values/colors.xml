@@ -5,6 +5,9 @@
     <color name="PrimaryLight">#673AB7</color>
     <color name="PrimaryDark">#9575CD</color>
 
+    <color name="OnPrimaryLight">#FEFEFE</color>
+    <color name="OnPrimaryDark">#0E0E0E</color>
+
     <color name="SecondaryLight">#B01C39</color>
     <color name="SecondaryDark">#C73356</color>
 
@@ -22,7 +25,7 @@
     <color name="textLight">#5A5A5A</color>
     <color name="textDark">#C8C8C8</color>
 
-    <color name="dim">#4D000000</color>
+    <color name="dim">#80000000</color>
 
     <color name="floatingDark">#424242</color>
     <color name="floatingDarkBorder">#4A4A4A</color>
@@ -33,5 +36,7 @@
     <color name="dividerDark">#878787</color>
     <color name="dividerLight">#9B9B9B</color>
 
+    <color name="cardDark">#282828</color>
+    <color name="cardLight">#FEFEFE</color>
 
 </resources>
