@@ -109,17 +109,19 @@ fun Drawable.toBase64(): String? {
 }
 
 fun Activity.showSnackbar(message: String, actionText: String = "OK", duration: Int = Snackbar.LENGTH_SHORT, callback: (() -> Unit)? = null) {
-    val snack = Snackbar.make(this.findViewById(R.id.coordinator), message, duration)
-    snack.setAction(actionText) {
+    if (Data.currentSnack?.isShown == true)
+        Data.currentSnack?.dismiss()
+    Data.currentSnack = Snackbar.make(this.findViewById(R.id.coordinator), message, duration)
+    Data.currentSnack?.setAction(actionText) {
         if (callback == null)
-            snack.dismiss()
+            Data.currentSnack?.dismiss()
         else {
             callback.invoke()
-            snack.dismiss()
+            Data.currentSnack?.dismiss()
         }
     }
-    snack.setActionTextColor(getThemeColorId(androidx.appcompat.R.attr.colorPrimary))
-    snack.show()
+    Data.currentSnack?.setActionTextColor(getThemeColorId(androidx.appcompat.R.attr.colorPrimary))
+    Data.currentSnack?.show()
 }
 
 fun Activity.getThemeColorId(resId: Int): Int {

@@ -22,6 +22,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.preference.PreferenceManager
 import androidx.transition.TransitionManager
+import com.anggrayudi.storage.SimpleStorageHelper
 import com.cookiedinner.ytcompanion.R
 import com.cookiedinner.ytcompanion.databinding.ActivityMainBinding
 import com.cookiedinner.ytcompanion.databinding.AddBookmarkSheetBinding
@@ -31,6 +32,10 @@ import com.cookiedinner.ytcompanion.views.viewmodels.MainActivityViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.transition.MaterialArcMotion
 import com.google.android.material.transition.MaterialContainerTransform
+import com.yausername.ffmpeg.FFmpeg
+import com.yausername.youtubedl_android.YoutubeDL
+import com.yausername.youtubedl_android.YoutubeDLException
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 
 class MainActivity : AppCompatActivity() {
 
@@ -49,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         setupBottomNavigationView()
         setupUI()
         setupBackPressed()
+        initializeYtDlp()
     }
 
     private fun setupUI() {
@@ -107,7 +113,7 @@ class MainActivity : AppCompatActivity() {
                     binding.floatingActionButton.show()
 
                     navController.navigate(R.id.navigation_downloads,null, navOptions)
-                    setupBookmarksSheet()
+                    setupDownloadSheet()
                 }
                 R.id.navigation_settings -> {
                     binding.floatingActionButton.hide()
@@ -278,6 +284,10 @@ class MainActivity : AppCompatActivity() {
         sheetBinding.textEditURL.text = null
     }
 
+    private fun setupDownloadSheet() {
+        binding.fabSheet.removeAllViewsInLayout()
+    }
+
     private fun hidePopup() {
         hideKeyboard()
         morphFloatingActionButton()
@@ -290,5 +300,20 @@ class MainActivity : AppCompatActivity() {
         sheetBinding.videoTitle.text = ""
         sheetBinding.videoChannel.text = ""
         sheetBinding.placeholder.visibility = View.VISIBLE
+    }
+
+    private fun initializeYtDlp() {
+        try {
+            val storageHelper = SimpleStorageHelper(this)
+            Data.storageHelper = storageHelper
+        } catch (ex: Exception) {
+            Log.e("Errors", "Failed to initialize the storage helper", ex)
+        }
+        try {
+            YoutubeDL.getInstance().init(this)
+            FFmpeg.getInstance().init(this)
+        } catch (ex: YoutubeDLException) {
+            Log.e("Errors", "Failed to initialize youtubedl-android", ex)
+        }
     }
 }

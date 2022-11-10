@@ -24,8 +24,8 @@
             app:summary="..."
             app:dialogTitle="@string/preferences_quality_title"
             app:entries="@array/preferences_quality"
-            app:entryValues="@array/preferences_quality"
-            app:defaultValue="1080p"
+            app:entryValues="@array/preferences_quality_values"
+            app:defaultValue="1080"
             app:iconSpaceReserved="false"/>
         <ListPreference
             app:key="extension"
@@ -33,8 +33,13 @@
             app:summary="..."
             app:dialogTitle="@string/preferences_extension_title"
             app:entries="@array/preferences_extension"
-            app:entryValues="@array/preferences_extension"
-            app:defaultValue="Video"
+            app:entryValues="@array/download_extensions"
+            app:defaultValue=".mp3"
             app:iconSpaceReserved="false"/>
+        <Preference
+            app:key="download_location"
+            app:title="Default download location"
+            app:summary="..."
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
 </PreferenceScreen>

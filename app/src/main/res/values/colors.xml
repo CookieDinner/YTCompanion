@@ -2,7 +2,7 @@
 <resources>
 
     <color name="transparent">#00FFFFFF</color>
-    <color name="PrimaryLight">#673AB7</color>
+    <color name="PrimaryLight">#8968C5</color>
     <color name="PrimaryDark">#9575CD</color>
 
     <color name="OnPrimaryLight">#FEFEFE</color>
@@ -26,6 +26,7 @@
     <color name="textDark">#C8C8C8</color>
 
     <color name="dim">#80000000</color>
+    <color name="dimSlight">#34000000</color>
 
     <color name="floatingDark">#424242</color>
     <color name="floatingDarkBorder">#4A4A4A</color>

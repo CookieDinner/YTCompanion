@@ -14,8 +14,11 @@ android {
         targetSdk 33
         versionCode 1
         versionName "alpha-01"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
+        }
     }
 
     buildTypes {
@@ -38,6 +41,14 @@ android {
     }
 }
 
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io'}
+    }
+}
+
 dependencies {
 
     implementation 'androidx.core:core-ktx:1.9.0'
@@ -55,6 +66,10 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC3'
+    implementation 'com.github.yausername.youtubedl-android:library:8bc8e77349'
+    implementation 'com.github.yausername.youtubedl-android:ffmpeg:8bc8e77349'
+    implementation "com.anggrayudi:storage:1.5.1"
 
 
     implementation 'androidx.room:room-runtime:2.4.3'

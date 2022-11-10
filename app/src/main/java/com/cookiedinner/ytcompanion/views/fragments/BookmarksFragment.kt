@@ -2,47 +2,46 @@ package com.cookiedinner.ytcompanion.views.fragments
 
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.text.SpannableString
 import android.text.style.DynamicDrawableSpan
 import android.text.style.ImageSpan
 import android.util.Log
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.Toast
-import androidx.coordinatorlayout.widget.CoordinatorLayout
+import android.widget.ArrayAdapter
+import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
+import com.anggrayudi.storage.SimpleStorage
+import com.anggrayudi.storage.SimpleStorageHelper
+import com.anggrayudi.storage.file.*
+import com.anggrayudi.storage.media.MediaType
 import com.cookiedinner.ytcompanion.R
 import com.cookiedinner.ytcompanion.databinding.FragmentBookmarksBinding
-import com.cookiedinner.ytcompanion.utilities.SwipeToDeleteCallback
+import com.cookiedinner.ytcompanion.utilities.*
 import com.cookiedinner.ytcompanion.utilities.database.BookmarkedVideo
-import com.cookiedinner.ytcompanion.utilities.getCurrentDate
-import com.cookiedinner.ytcompanion.utilities.observeFresh
-import com.cookiedinner.ytcompanion.utilities.showSnackbar
 import com.cookiedinner.ytcompanion.views.fragments.adapters.BookmarkedVideosAdapter
 import com.cookiedinner.ytcompanion.views.fragments.adapters.BookmarkedVideosAdapterInterface
 import com.cookiedinner.ytcompanion.views.viewmodels.BookmarksViewModel
 import com.cookiedinner.ytcompanion.views.viewmodels.MainActivityViewModel
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.transition.MaterialArcMotion
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.android.material.transition.MaterialContainerTransform
-import kotlinx.coroutines.delay
-import java.text.DateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.Calendar
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
+import net.yslibrary.android.keyboardvisibilityevent.Unregistrar
+import java.io.File
 
 
 class BookmarksFragment : Fragment() {
@@ -54,6 +53,7 @@ class BookmarksFragment : Fragment() {
     private val bookmarkedVideosList: MutableList<BookmarkedVideo> = mutableListOf()
     private lateinit var bookmarksRecycler: RecyclerView
     private lateinit var adapter: BookmarkedVideosAdapter
+    private var keyboardListener: Unregistrar? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -78,86 +78,24 @@ class BookmarksFragment : Fragment() {
 
         bookmarksRecycler = binding.recyclerView
         bookmarksRecycler.layoutManager = LinearLayoutManager(activity)
+
         adapter = BookmarkedVideosAdapter(bookmarkedVideosList, object: BookmarkedVideosAdapterInterface {
             override fun downloadButtonPressed(bookmarkedVideo: BookmarkedVideo, pressedButton: MaterialButton) {
-                activityViewModel.liveDataGiveFabLocation.observeFresh(viewLifecycleOwner) {
-                    val fabPositionY = it.contentIfNotHandled
-                    if (fabPositionY != null) {
-                        val location = intArrayOf(0, 0)
-                        pressedButton.getLocationInWindow(location)
-                        var possibleTranslationY = location[1].toFloat() - 112
-                        Log.d("Tests", "$possibleTranslationY --- ${fabPositionY * 0.55}")
-                        if (possibleTranslationY > (fabPositionY * 0.52)) {
-                            possibleTranslationY = (fabPositionY * 0.52).toFloat()
-                        }
-                        binding.downloadPopup.translationY = possibleTranslationY
-                        binding.downloadPopup.setOnClickListener {
-                            morphDownloadButton(pressedButton)
-                        }
-                        morphDownloadButton(pressedButton)
-                    }
-                }
-                activityViewModel.askForFabPosition()
+                rowDownloadButtonClicked(bookmarkedVideo, pressedButton)
             }
 
             override fun cardPressed(bookmarkedVideo: BookmarkedVideo) {
                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(bookmarkedVideo.videoUrl))
                 startActivity(browserIntent)
             }
-
-        })
+        }, activityViewModel, requireActivity())
         bookmarksRecycler.adapter = adapter
 
-//        bookmarksRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-//            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-//                super.onScrollStateChanged(recyclerView, newState)
-//                    if (!recyclerView.canScrollVertically(1) && recyclerView.canScrollVertically(-1)) {
-//                        activityViewModel.notifyFab(isVisible = false)
-//                    } else {
-//                        activityViewModel.notifyFab(isVisible = true)
-//                    }
-//            }
-//        })
-
-//        activityViewModel.getAllBookmarks(requireActivity()).observe(viewLifecycleOwner) {
-//            if (it.isNotEmpty()) {
-//                binding.textEmptyBookmarks.visibility = View.GONE
-//                it.forEach { bookmark ->
-//                    bookmarkedVideosList.add(bookmark)
-//                    adapter.notifyItemInserted(bookmarkedVideosList.size - 1)
-//                }
-//            }
-//        }
         activityViewModel.populateBookmarksList(requireActivity()).observe(viewLifecycleOwner) {
             if (binding.textEmptyBookmarks.isVisible)
                 binding.textEmptyBookmarks.visibility = View.GONE
             bookmarkedVideosList.add(it)
             adapter.notifyItemInserted(bookmarkedVideosList.size - 1)
-        }
-    }
-
-    private fun morphDownloadButton(pressedButton: MaterialButton) {
-        if (pressedButton.isVisible)
-            activityViewModel.hidePopup()
-        val views = listOf(pressedButton, binding.downloadPopup).sortedBy { !it.isVisible }
-        val transform = MaterialContainerTransform().apply {
-            startView = views.first()
-            endView = views.last()
-            addTarget(views.last())
-            scrimColor = Color.TRANSPARENT
-        }
-
-        TransitionManager.beginDelayedTransition(binding.root, transform)
-        views.first().visibility = View.INVISIBLE
-        views.last().visibility = View.VISIBLE
-        if (pressedButton.isVisible) {
-            binding.dimLayout.visibility = View.GONE
-            activityViewModel.notifyPopupOpened(false)
-        } else {
-            binding.dimLayout.visibility = View.VISIBLE
-            activityViewModel.notifyPopupOpened(true) {
-                morphDownloadButton(pressedButton)
-            }
         }
     }
 
@@ -168,8 +106,12 @@ class BookmarksFragment : Fragment() {
                 var index = bookmarkedVideosList.indexOfFirst { it.modificationDate < insertedBookmark.modificationDate }
                 if (index == -1)
                     index = bookmarkedVideosList.size
+                val recyclerLayoutManager = bookmarksRecycler.layoutManager as LinearLayoutManager
+                val firstVisibleRow = recyclerLayoutManager.findFirstVisibleItemPosition()
+                val lastVisibleRow = recyclerLayoutManager.findLastVisibleItemPosition()
+                if (index - 1 !in firstVisibleRow..lastVisibleRow)
+                    bookmarksRecycler.scrollToPosition(index)
                 bookmarkedVideosList.add(index, insertedBookmark)
-                bookmarksRecycler.scrollToPosition(index)
                 if (bookmarkedVideosList.isNotEmpty()) {
                     binding.textEmptyBookmarks.visibility = View.GONE
                 }
@@ -204,8 +146,102 @@ class BookmarksFragment : Fragment() {
         itemTouchHelper.attachToRecyclerView(bookmarksRecycler)
     }
 
+    private fun morphDownloadButton(pressedButton: MaterialButton) {
+        keyboardListener?.unregister()
+        if (pressedButton.isVisible)
+            activityViewModel.hidePopup()
+        val views = listOf(pressedButton, binding.downloadPopup).sortedBy { !it.isVisible }
+        val transform = MaterialContainerTransform().apply {
+            startView = views.first()
+            endView = views.last()
+            addTarget(views.last())
+            scrimColor = Color.TRANSPARENT
+            isElevationShadowEnabled = false
+        }
+        TransitionManager.beginDelayedTransition(binding.root, transform)
+        views.first().visibility = View.INVISIBLE
+        views.last().visibility = View.VISIBLE
+        if (pressedButton.isVisible) {
+            activityViewModel.notifyFab(isVisible = true)
+            binding.dimLayout.visibility = View.GONE
+            activityViewModel.notifyPopupOpened(false)
+            activityViewModel.hideBottomNavigationView(false)
+        } else {
+            activityViewModel.notifyFab(isVisible = false)
+            activityViewModel.hideBottomNavigationView(true)
+            binding.dimLayout.visibility = View.VISIBLE
+            activityViewModel.notifyPopupOpened(true) {
+                /** I hate this workaround so much that it hurts my soul, but whatever... it works */
+                viewModel.closePopup(requireActivity()) {
+                    morphDownloadButton(pressedButton)
+                }
+            }
+        }
+    }
+
+    private fun rowDownloadButtonClicked(bookmarkedVideo: BookmarkedVideo, pressedButton: MaterialButton) {
+        val rect = Rect()
+        requireActivity().window.decorView.getWindowVisibleDisplayFrame(rect)
+        var trimmedSafeBottomPositionY = (rect.bottom * 0.6).toFloat()
+
+        val pressedButtonLocation = intArrayOf(0, 0)
+        pressedButton.getLocationInWindow(pressedButtonLocation)
+
+        var possibleTranslationY = pressedButtonLocation[1].toFloat() - 112
+
+        if (possibleTranslationY > trimmedSafeBottomPositionY) {
+            possibleTranslationY = trimmedSafeBottomPositionY
+        }
+        binding.downloadPopup.translationY = possibleTranslationY
+        binding.downloadPopupContent.textEditFilename.setText(bookmarkedVideo.title)
+        binding.downloadPopupContent.downloadButton.setOnClickListener {
+            val defaultDownloadsDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "YTCompanion")
+            val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
+            val downloadPath = prefs.getString("download_location", defaultDownloadsDir.absolutePath)!!
+            val quality = prefs.getString("quality", "1080")!!
+            viewModel.downloadBookmark(
+                requireActivity(),
+                activityViewModel,
+                bookmarkedVideo,
+                downloadPath,
+                binding.downloadPopupContent.textEditFilename.text.toString(),
+                binding.downloadPopupContent.textEditExtensionsDropdown.text.toString(),
+                quality
+            )
+            morphDownloadButton(pressedButton)
+        }
+
+        /** Dropdown setup */
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        val defaultExtension = prefs.getString("extension", ".mp4")
+        binding.downloadPopupContent.textEditExtensionsDropdown.setText(defaultExtension)
+
+        val extensionsArray = resources.getStringArray(R.array.download_extensions)
+        val extensionsDropdownAdapter = ArrayAdapter(requireContext(), R.layout.row_dropdown_extension, extensionsArray)
+        binding.downloadPopupContent.textEditExtensionsDropdown.setAdapter(extensionsDropdownAdapter)
+
+        morphDownloadButton(pressedButton)
+
+        /** Custom method of keeping the popup above the keyboard cause the default one is fucky in this scenario */
+        keyboardListener = KeyboardVisibilityEvent.registerEventListener(requireActivity()) { keyboardVisible ->
+            if (keyboardVisible) {
+                requireActivity().window.decorView.getWindowVisibleDisplayFrame(rect)
+                trimmedSafeBottomPositionY = (rect.bottom * 0.52).toFloat()
+                if (possibleTranslationY > trimmedSafeBottomPositionY)
+                    binding.downloadPopup.translationY = trimmedSafeBottomPositionY
+            } else {
+                if (binding.downloadPopup.translationY != possibleTranslationY)
+                    binding.downloadPopup.translationY = possibleTranslationY
+            }
+        }
+        activityViewModel.askForFabPosition()
+    }
+
     override fun onDestroyView() {
+        Data.currentSnack?.dismiss()
         super.onDestroyView()
         _binding = null
     }
+
+
 }

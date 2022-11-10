@@ -6,6 +6,12 @@
     android:layout_height="245dp"
     android:background="@drawable/background_sheet">
 
+    <View
+        android:id="@+id/clickable_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"/>
+
     <TextView
         android:id="@+id/text_title"
         android:layout_width="wrap_content"
@@ -48,7 +54,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/textEditFilename"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:autofillHints="username"
                 android:ems="16"
                 android:inputType="textUri"
@@ -56,29 +62,41 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textViewExtensionPicker"
+            android:id="@+id/textViewExtensionsDropdown"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="0dp"
-            android:layout_height="64dp"
-            android:hint="mp4"
+            android:layout_height="wrap_content"
+            android:hint="@string/extension"
+            android:focusable="false"
             app:boxBackgroundColor="?android:attr/colorBackgroundFloating"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintWidth_default="percent"
-            app:layout_constraintWidth_percent="0.4"
+            app:layout_constraintWidth_percent="0.45"
             app:layout_constraintHorizontal_bias="0"
             app:layout_constraintTop_toBottomOf="@id/textViewFilename">
 
             <AutoCompleteTextView
-                android:id="@+id/textEditExtensionPicker"
+                android:id="@+id/textEditExtensionsDropdown"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:autofillHints="username"
-                android:drawablePadding="-15dp"
+                android:layout_height="56dp"
                 android:inputType="none"
-                android:ems="16"
                 android:textColor="?textFillColor" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/download_button"
+            style="@style/Widget.MaterialComponents.Button.IconOnly"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            app:icon="@drawable/ic_baseline_download_24"
+            app:iconTint="?cardBackgroundColor"
+            app:iconSize="16dp"
+            app:cornerRadius="7dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_default="percent"
+            app:layout_constraintWidth_percent="0.45"
+            app:layout_constraintBottom_toBottomOf="@id/textViewExtensionsDropdown"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

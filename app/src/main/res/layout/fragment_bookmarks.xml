@@ -23,7 +23,7 @@
             android:id="@+id/recycler_view"
             android:visibility="visible"
             android:paddingTop="12dp"
-            android:paddingBottom="100dp"
+            android:paddingBottom="170dp"
             android:clipToPadding="false"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
@@ -33,21 +33,20 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone"
-            android:elevation="4dp" />
+            android:background="@color/dimSlight" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/download_popup"
-            android:layout_width="300dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:clickable="true"
-            android:layout_marginBottom="256dp"
-            app:cardCornerRadius="22dp"
-            app:cardElevation="10dp"
+            app:cardCornerRadius="28dp"
             app:cardBackgroundColor="?android:attr/colorBackgroundFloating"
             android:layout_gravity="end"
+            android:layout_marginStart="26dp"
             android:layout_marginEnd="24dp">
                 <include
+                    android:id="@+id/download_popup_content"
                     layout="@layout/download_from_bookmarks_popup"/>
         </com.google.android.material.card.MaterialCardView>
 

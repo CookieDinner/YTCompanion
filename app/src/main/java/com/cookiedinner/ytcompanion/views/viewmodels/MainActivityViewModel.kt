@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
+import android.os.Environment
 import android.util.Base64
 import android.util.Log
 import android.view.View
@@ -17,6 +18,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
+import com.anggrayudi.storage.SimpleStorageHelper
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -32,10 +34,13 @@ import com.cookiedinner.ytcompanion.utilities.toBase64
 import com.cookiedinner.ytcompanion.views.MainActivity
 import com.cookiedinner.ytcompanion.views.fragments.adapters.BookmarkedVideosAdapter
 import com.google.android.material.snackbar.Snackbar
+import com.yausername.youtubedl_android.YoutubeDL
+import com.yausername.youtubedl_android.YoutubeDLRequest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.ByteArrayOutputStream
+import java.io.File
 
 class MainActivityViewModel: ViewModel() {
 
@@ -91,6 +96,10 @@ class MainActivityViewModel: ViewModel() {
 
     val liveDataGiveFabLocation: MutableLiveData<Event<Int>> by lazy {
         MutableLiveData<Event<Int>>()
+    }
+
+    val liveDataUpdateProgressBar: MutableLiveData<Pair<BookmarkedVideo, Int>> by lazy {
+        MutableLiveData<Pair<BookmarkedVideo, Int>>()
     }
 
     fun setFabPosition(positionY: Int) {
@@ -150,7 +159,6 @@ class MainActivityViewModel: ViewModel() {
     }
 
     fun loadImageFromURLInto(context: Context, thumbnailURL: String, imageView: ImageView, callback: ((result: Boolean, base64Image: String?) -> Unit)? = null) {
-
         Glide.with(context).load(thumbnailURL)
             .listener(object : RequestListener<Drawable> {
                 override fun onLoadFailed(
@@ -259,11 +267,15 @@ class MainActivityViewModel: ViewModel() {
             val bookmarksDao = db.bookmarkedVideosDao()
             val list = bookmarksDao.getAll()
             list.forEach {
-                delay(50)
+                delay(30)
                 result.value = it
             }
             db.close()
         }
         return result
+    }
+
+    fun updateProgress(item: BookmarkedVideo, progress: Int) {
+        liveDataUpdateProgressBar.postValue(Pair(item, progress))
     }
 }

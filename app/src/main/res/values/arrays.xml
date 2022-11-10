@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Preferences' arrays -->
     <string-array name="preferences_theme">
         <item>On</item>
         <item>Off</item>
@@ -13,8 +14,24 @@
         <item>720p</item>
         <item>1080p</item>
     </string-array>
+    <string-array name="preferences_quality_values">
+        <item>144</item>
+        <item>240</item>
+        <item>360</item>
+        <item>480</item>
+        <item>720</item>
+        <item>1080</item>
+    </string-array>
     <string-array name="preferences_extension">
-        <item>Video</item>
-        <item>Audio</item>
+        <item>Audio (.mp3)</item>
+        <item>Video (.mp4)</item>
+        <item>Video (.webm)</item>
+    </string-array>
+
+    <!-- App content arrays -->
+    <string-array name="download_extensions">
+        <item>.mp3</item>
+        <item>.mp4</item>
+        <item>.webm</item>
     </string-array>
 </resources>
